@@ -46,6 +46,7 @@ ls -l /tmp/
 | Command | Description |
 |----------|------------|
 | `cat /etc/hostname` | Display system hostname |
+| `cat /etc/os-release` | Display operating system information |
 | `uptime` | Show how long the system has been running |
 | `free -m` | Display memory usage in megabytes |
 
