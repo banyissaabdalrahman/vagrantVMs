@@ -1,6 +1,6 @@
 # Linux Command Reference
 
-A structured overview of essential Linux commands, including command syntax, system information utilities, file types, linking, and basic file management operations.
+A structured overview of essential Linux commands, including command syntax, system information utilities, file types, linking, filtering, and basic file management operations.
 
 ---
 
@@ -21,10 +21,6 @@ command [options] [arguments]
 ```bash
 ls -l /tmp/
 ```
-
-- `ls` → Command  
-- `-l` → Option (long listing format)  
-- `/tmp/` → Target directory  
 
 ---
 
@@ -47,14 +43,14 @@ ls -l /tmp/
 |----------|------------|
 | `cat /etc/hostname` | Display system hostname |
 | `cat /etc/os-release` | Display operating system information |
-| `uptime` | Show how long the system has been running |
-| `free -m` | Display memory usage in megabytes |
+| `uptime` | Show system running time |
+| `free -m` | Display memory usage in MB |
 
 ---
 
 ## 4. File and Directory Management
 
-### 4.1 Create Files and Directories
+### Create
 
 ```bash
 mkdir foldername
@@ -62,67 +58,39 @@ touch filename.txt
 touch devopsfile{1..10}.txt
 ```
 
-- `mkdir` → Create a new directory  
-- `touch` → Create an empty file  
-- `{1..10}` → Brace expansion to create multiple files  
-
----
-
-### 4.2 Copy Files and Directories
+### Copy
 
 ```bash
 cp file1 destination
 cp -r dir1 destination
 ```
 
-- `cp` → Copy files  
-- `-r` → Recursive copy (required for directories)  
-
----
-
-### 4.3 Move or Rename
+### Move / Rename
 
 ```bash
 mv source destination
 ```
 
-- `mv` → Move or rename files and directories  
-
----
-
-### 4.4 Remove Files and Directories
+### Remove
 
 ```bash
 rm file
 rm -r dir
 ```
 
-- `rm` → Remove files  
-- `-r` → Remove directories recursively  
-
-> ⚠ Use `rm -r` carefully. It permanently deletes directories and their contents.
+> ⚠ `rm -r` permanently deletes directories and their contents.
 
 ---
 
 ## 5. File Types in Linux
 
-Linux supports different file types such as:
-
-- Regular files
-- Directories
-- Symbolic links
-- Block devices
-- Character devices
-- Sockets
-- Named pipes
-
-### View Detailed File Information
+### Long Listing Format
 
 ```bash
 ls -l
 ```
 
-Displays long listing format with permissions, ownership, size, and timestamp.
+Displays detailed file information (permissions, owner, size, timestamp).
 
 ### Identify File Type
 
@@ -136,7 +104,7 @@ Determines whether a file is text, binary, executable, etc.
 
 ## 6. Symbolic Links (Soft Links)
 
-### Example Workflow
+### Create Directory Structure
 
 ```bash
 mkdir /opt/dev/ops/devops/test
@@ -144,16 +112,13 @@ mkdir -p /opt/dev/ops/devops/test
 vim /opt/dev/ops/devops/test/commands.txt
 ```
 
-### Create a Symbolic Link
+### Create Symbolic Link
 
 ```bash
 ln -s /opt/dev/ops/devops/test/commands.txt cmds
 ```
 
-- `ln -s` → Create a soft (symbolic) link  
-- `cmds` → Link name in the current directory  
-
-### Verify the Link
+### Verify
 
 ```bash
 cat cmds
@@ -167,14 +132,14 @@ mv /opt/dev/ops/devops/test/commands.txt /tmp/
 ls -l
 ```
 
-Move it back:
+Move back:
 
 ```bash
 mv /tmp/commands.txt /opt/dev/ops/devops/test/
 ls -l
 ```
 
-### Remove a Symbolic Link
+### Remove Link
 
 ```bash
 rm cmds
@@ -186,9 +151,9 @@ unlink cmds
 ## 7. Sorting with `ls`
 
 ```bash
-ls -l     # Sort alphabetically (default)
-ls -lt    # Sort by timestamp (newest first)
-ls -ltr   # Reverse sort by timestamp (oldest first)
+ls -l     # Alphabetical (default)
+ls -lt    # Newest first
+ls -ltr   # Oldest first
 ```
 
 ---
@@ -201,44 +166,173 @@ ls -ltr   # Reverse sort by timestamp (oldest first)
 vim /etc/hostname
 ```
 
-### Apply New Hostname Temporarily
+### Apply Hostname Temporarily
 
 ```bash
 hostname new_hostname
 ```
 
-### Final Step
+### Apply Changes
 
 ```bash
 logout
 login
 ```
 
-Log out and log back in to see the updated hostname reflected in your session.
+---
+
+## 9. Filters and Text Processing
+
+### grep (Search Text)
+
+```bash
+grep firewall anaconda-ks.cfg
+```
+
+Search for a keyword inside a file.
+
+```bash
+grep -i keyword fileName
+```
+
+Ignore case sensitivity.
+
+```bash
+grep -R keyword *
+```
+
+Search recursively in all files and directories in the current path.
+
+```bash
+grep -v keyword fileName
+```
+
+Exclude lines containing the keyword.
+
+### Example
+
+```bash
+grep -R SELINUX /etc/*
+```
 
 ---
 
-## 9. Getting Help
+### less and more (Read File Content)
 
-Linux provides built-in documentation for most commands.
+```bash
+less fileName
+more fileName
+```
 
-### Quick Help
+Display file content page by page.
+
+---
+
+### head (Beginning of File)
+
+```bash
+head fileName
+```
+
+Show first 10 lines.
+
+```bash
+head -n 2 fileName
+```
+
+Show first *n* lines.
+
+---
+
+### tail (End of File)
+
+```bash
+tail fileName
+```
+
+Show last 10 lines.
+
+```bash
+tail -n 7 fileName
+```
+
+Show last *n* lines.
+
+```bash
+tail -f fileName
+```
+
+Monitor file changes in real time.
+
+### Example (Log Monitoring)
+
+```bash
+cd /var/log/
+ls
+tail -f yum.log
+tail -f messages
+```
+
+Open another terminal and log in (e.g., `vagrant ssh`) to observe live updates.
+
+---
+
+## 10. Working with Columns and Fields
+
+### View User Information
+
+```bash
+cat /etc/passwd
+```
+
+### Extract First Column Using cut
+
+```bash
+cut -d: -f1 /etc/passwd
+```
+
+- `-d:` → Delimiter  
+- `-f1` → First field  
+
+### Extract First Column Using awk
+
+```bash
+awk -F':' '{print $1}' /etc/passwd
+```
+
+- `-F` → Field separator  
+
+**Difference:**  
+`cut` requires a delimiter.  
+`awk` allows flexible field processing.
+
+---
+
+## 11. Search and Replace
+
+### Using Vim
+
+```bash
+:%s/searchFor/replaceWith/g
+```
+
+- `g` → Global replacement (entire file)
+
+### Using sed
+
+```bash
+sed 's/searchFor/replaceWith/g' fileName
+```
+
+Performs search and replace within the file output.
+
+---
+
+## 12. Getting Help
 
 ```bash
 command --help
-```
-
-### Manual Pages
-
-```bash
 man command
-```
-
-### Examples
-
-```bash
-cp --help
-man cp
 ```
 
 ---
@@ -247,12 +341,14 @@ man cp
 
 This document covers:
 
-- Command structure fundamentals  
+- Command syntax  
 - Navigation and system information  
-- File and directory management  
-- File types and identification  
-- Symbolic links  
-- Sorting and hostname management  
-- Accessing built-in documentation  
+- File management  
+- File types and symbolic links  
+- Sorting  
+- Hostname management  
+- Text filtering and processing  
+- Search and replace  
+- Built-in documentation  
 
-These commands form the foundation of daily Linux usage and are essential for system administration and DevOps workflows.
+These commands form the foundation of practical Linux usage and DevOps workflows.
