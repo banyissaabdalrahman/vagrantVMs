@@ -1,6 +1,6 @@
 # Linux Command Reference
 
-A structured overview of essential Linux commands, including command syntax, system information utilities, file types, linking, filtering, and basic file management operations.
+A structured overview of essential Linux commands, including command syntax, system information utilities, file types, linking, filtering, redirection, pipes, and file search operations.
 
 ---
 
@@ -13,14 +13,8 @@ command [options] [arguments]
 ```
 
 - **command** → The program or utility to execute  
-- **options** → Modify command behavior (usually start with `-` or `--`)  
+- **options** → Modify command behavior  
 - **arguments** → Target files, directories, or values  
-
-### Example
-
-```bash
-ls -l /tmp/
-```
 
 ---
 
@@ -44,7 +38,8 @@ ls -l /tmp/
 | `cat /etc/hostname` | Display system hostname |
 | `cat /etc/os-release` | Display operating system information |
 | `uptime` | Show system running time |
-| `free -m` | Display memory usage in MB |
+| `free -m` | Display memory usage (MB) |
+| `df -h` | Display disk partition usage (human readable) |
 
 ---
 
@@ -78,103 +73,45 @@ rm file
 rm -r dir
 ```
 
-> ⚠ `rm -r` permanently deletes directories and their contents.
-
 ---
 
-## 5. File Types in Linux
-
-### Long Listing Format
+## 5. File Types
 
 ```bash
 ls -l
-```
-
-Displays detailed file information (permissions, owner, size, timestamp).
-
-### Identify File Type
-
-```bash
 file filename
 ```
 
-Determines whether a file is text, binary, executable, etc.
+- `ls -l` → Long listing format  
+- `file` → Identify file type  
 
 ---
 
-## 6. Symbolic Links (Soft Links)
-
-### Create Directory Structure
-
-```bash
-mkdir /opt/dev/ops/devops/test
-mkdir -p /opt/dev/ops/devops/test
-vim /opt/dev/ops/devops/test/commands.txt
-```
-
-### Create Symbolic Link
+## 6. Symbolic Links
 
 ```bash
 ln -s /opt/dev/ops/devops/test/commands.txt cmds
-```
-
-### Verify
-
-```bash
-cat cmds
-ls -l
-```
-
-### Move Original File
-
-```bash
-mv /opt/dev/ops/devops/test/commands.txt /tmp/
-ls -l
-```
-
-Move back:
-
-```bash
-mv /tmp/commands.txt /opt/dev/ops/devops/test/
-ls -l
-```
-
-### Remove Link
-
-```bash
 rm cmds
 unlink cmds
 ```
 
 ---
 
-## 7. Sorting with `ls`
+## 7. Sorting with ls
 
 ```bash
-ls -l     # Alphabetical (default)
-ls -lt    # Newest first
-ls -ltr   # Oldest first
+ls -l
+ls -lt
+ls -ltr
 ```
 
 ---
 
-## 8. Changing the Hostname
-
-### Edit Hostname File
+## 8. Changing Hostname
 
 ```bash
 vim /etc/hostname
-```
-
-### Apply Hostname Temporarily
-
-```bash
 hostname new_hostname
-```
-
-### Apply Changes
-
-```bash
 logout
 login
 ```
@@ -183,33 +120,16 @@ login
 
 ## 9. Filters and Text Processing
 
-### grep (Search Text)
+### grep
 
 ```bash
 grep firewall anaconda-ks.cfg
-```
-
-Search for a keyword inside a file.
-
-```bash
 grep -i keyword fileName
-```
-
-Ignore case sensitivity.
-
-```bash
 grep -R keyword *
-```
-
-Search recursively in all files and directories in the current path.
-
-```bash
 grep -v keyword fileName
 ```
 
-Exclude lines containing the keyword.
-
-### Example
+Example:
 
 ```bash
 grep -R SELINUX /etc/*
@@ -217,118 +137,171 @@ grep -R SELINUX /etc/*
 
 ---
 
-### less and more (Read File Content)
-
-```bash
-less fileName
-more fileName
-```
-
-Display file content page by page.
-
----
-
-### head (Beginning of File)
+### head and tail
 
 ```bash
 head fileName
-```
-
-Show first 10 lines.
-
-```bash
 head -n 2 fileName
-```
-
-Show first *n* lines.
-
----
-
-### tail (End of File)
-
-```bash
 tail fileName
-```
-
-Show last 10 lines.
-
-```bash
 tail -n 7 fileName
-```
-
-Show last *n* lines.
-
-```bash
 tail -f fileName
 ```
 
-Monitor file changes in real time.
-
-### Example (Log Monitoring)
+Example:
 
 ```bash
 cd /var/log/
-ls
 tail -f yum.log
 tail -f messages
 ```
 
-Open another terminal and log in (e.g., `vagrant ssh`) to observe live updates.
-
 ---
 
-## 10. Working with Columns and Fields
-
-### View User Information
+### cut and awk
 
 ```bash
 cat /etc/passwd
-```
-
-### Extract First Column Using cut
-
-```bash
 cut -d: -f1 /etc/passwd
-```
-
-- `-d:` → Delimiter  
-- `-f1` → First field  
-
-### Extract First Column Using awk
-
-```bash
 awk -F':' '{print $1}' /etc/passwd
 ```
 
-- `-F` → Field separator  
-
-**Difference:**  
-`cut` requires a delimiter.  
-`awk` allows flexible field processing.
-
 ---
 
-## 11. Search and Replace
-
-### Using Vim
+### Search and Replace
 
 ```bash
 :%s/searchFor/replaceWith/g
-```
-
-- `g` → Global replacement (entire file)
-
-### Using sed
-
-```bash
 sed 's/searchFor/replaceWith/g' fileName
 ```
 
-Performs search and replace within the file output.
+---
+
+## 10. Input / Output Redirection
+
+### Basic Redirection
+
+```bash
+uptime > /tmp/sysinfo.txt
+cat /tmp/sysinfo.txt
+ls > /tmp/sysinfo.txt
+uptime >> /tmp/sysinfo.txt
+```
+
+- `>` → Overwrite file  
+- `>>` → Append to file  
 
 ---
 
-## 12. Getting Help
+### Building a System Report
+
+```bash
+echo > /tmp/sysinfo.txt
+date >> /tmp/sysinfo.txt
+echo "##############################################" >> /tmp/sysinfo.txt
+uptime >> /tmp/sysinfo.txt
+echo "##############################################" >> /tmp/sysinfo.txt
+free -m >> /tmp/sysinfo.txt
+echo "##############################################" >> /tmp/sysinfo.txt
+df -h >> /tmp/sysinfo.txt
+echo "##############################################" >> /tmp/sysinfo.txt
+echo >> /tmp/sysinfo.txt
+cat /tmp/sysinfo.txt
+```
+
+---
+
+### Redirect to /dev/null
+
+```bash
+yum install vim -y > /dev/null
+```
+
+Redirect output to a null device (discard output).
+
+Clear file using:
+
+```bash
+cat /dev/null > /tmp/sysinfo.txt
+```
+
+---
+
+### Redirecting Errors
+
+```bash
+freeee -m > /dev/null
+freeee -m 2>> /tmp/errors.log
+```
+
+- `2>>` → Append error output  
+
+Redirect both output and errors:
+
+```bash
+free -m &>> /tmp/errors.log
+freeeeee -m &>> /tmp/errors.log
+```
+
+---
+
+### Word Count
+
+```bash
+wc -l /etc/passwd
+```
+
+Counts number of lines.
+
+---
+
+## 11. Pipes
+
+A pipe (`|`) sends the output of one command as input to another command.
+
+Example:
+
+```bash
+cd /etc/ && ls | wc -l
+```
+
+Examples:
+
+```bash
+cd /etc/ && ls | grep host
+tail -20 /var/log/messages | grep -i vagrant
+free -m | grep -i mem
+cd /etc/ && ls -l | tail
+```
+
+---
+
+## 12. File Search
+
+### find (Real-Time Search)
+
+```bash
+find /etc/ -name host*
+```
+
+Searches for files by name in real time.
+
+---
+
+### locate (Database-Based Search)
+
+```bash
+yum install mlocate -y
+updatedb
+locate host
+```
+
+- `locate` searches using a database  
+- Not real-time  
+- May not be installed by default  
+
+---
+
+## 13. Getting Help
 
 ```bash
 command --help
@@ -341,14 +314,13 @@ man command
 
 This document covers:
 
-- Command syntax  
-- Navigation and system information  
+- Command structure  
 - File management  
-- File types and symbolic links  
-- Sorting  
-- Hostname management  
-- Text filtering and processing  
-- Search and replace  
+- Filters and text processing  
+- Input/output redirection  
+- Pipes  
+- File search utilities  
+- System monitoring commands  
 - Built-in documentation  
 
-These commands form the foundation of practical Linux usage and DevOps workflows.
+These commands form the foundation of practical Linux and DevOps workflows.
