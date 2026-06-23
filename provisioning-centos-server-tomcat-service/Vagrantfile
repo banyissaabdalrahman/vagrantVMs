@@ -1,0 +1,71 @@
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "eurolinux-vagrant/centos-stream-9"
+  config.vm.box_version = "9.0.48"
+
+  config.vm.network "private_network", ip: "192.168.56.15"
+
+  config.vm.provider "virtualbox" do |vb|
+      vb.memory = "1560"
+      vb.cpus = 2
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    echo "=========================================================================================="
+    echo "Installing Tomcat 10.1.55"
+    echo "=========================================================================================="
+    sudo dnf install java-17-openjdk -y
+    sudo useradd --home-dir /opt/tomcat --shell /sbin/nologin tomcat
+    wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.55/bin/apache-tomcat-10.1.55.tar.gz
+    sudo tar xzvf apache-tomcat-10.1.55.tar.gz
+    sudo cp -r apache-tomcat-10.1.55/* /opt/tomcat/
+    sudo chown -R tomcat:tomcat /opt/tomcat
+    sudo cat > /etc/systemd/system/tomcat.service << EOF
+            [Unit]
+            Description=Apache Tomcat Web Application Container
+            After=network.target
+
+            [Service]
+            Type=forking
+
+            WorkingDirectory=/opt/tomcat
+
+            Environment=JAVA_HOME=/usr/lib/jvm/jre
+            Environment=CATALINA_HOME=/opt/tomcat
+            Environment=CATALINA_BASE=/opt/tomcat
+
+            ExecStart=/opt/tomcat/bin/startup.sh
+            ExecStop=/opt/tomcat/bin/shutdown.sh
+
+            User=tomcat
+            Group=tomcat
+
+            [Install]
+            WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable tomcat
+    sudo systemctl start tomcat
+
+
+if sudo systemctl is-active --quiet tomcat; then
+    IP=$(hostname -I | awk '{print $2}')
+    echo ""
+    echo "=========================================================================================="
+    echo "Tomcat 10.1.55 installed successfully!"
+    echo "Tomcat service is running."
+    echo ""
+    echo "Open the following URL in your browser:"
+    echo "http://${IP}:8080"
+    echo "=========================================================================================="
+else
+    echo ""
+    echo "=========================================================================================="
+    echo "Tomcat installation completed, but the service failed to start."
+    echo "Check logs with:"
+    echo "sudo journalctl -xeu tomcat.service"
+    echo "=========================================================================================="
+fi
+  SHELL
+end
